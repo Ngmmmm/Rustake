@@ -14,3 +14,8 @@ ID GitLab/moule : @degorre
 
 Mail : ethan.duquennoy@etu.u-paris.fr
 ID Gitlab/moule : @duquenno
+
+## Noa Gregoire-Mellier
+
+Mail : noa.gregoire-mellier@etu.u-paris.fr
+ID GitLab/moule : @gregoirn
