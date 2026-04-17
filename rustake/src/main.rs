@@ -13,7 +13,6 @@ fn main() {
     match &args.command {
         Some(Commands::Init) => {
             println!("Initialisation : création d'un Rustakefile.toml par défaut");
-            // TODO: Logique pour créer le fichier par défaut
             let file_path = Path::new("Rustakefile.toml");
             
             // On vérifie si le fichier n'existe pas déjà
@@ -34,7 +33,29 @@ fn main() {
         }
         Some(Commands::Clean) => {
             println!("Nettoyage : suppression du cache et des cibles");
-            // TODO: Logique pour supprimer le dossier .rustake/ et les exécutables
+            let cache_dir = Path::new(".rustake");
+            if cache_dir.exists() {
+                match fs::remove_dir_all(cache_dir) {
+                    Ok(_) => println!("Dossier de cache '.rustake' supprimé."),
+                    Err(e) => eprintln!("Erreur lors de la suppression du cache : {}", e),
+                }
+            } else {
+                println!("Aucun cache trouvé.");
+            }
+            if let Ok(conf) = config::load("Rustakefile.toml") {
+                for (name, _) in conf.targets {
+                    let target_path = Path::new(&name);
+                    if target_path.exists() {
+                        // si fichier on supprime
+                        match fs::remove_file(target_path) {
+                            Ok(_) => println!("Cible '{}' supprimée.", name),
+                            Err(e) => eprintln!("Impossible de supprimer la cible '{}' : {}", name, e),
+                        }
+                    }
+                }
+            } else {
+                println!("Impossible de lire 'Rustakefile.toml', nettoyage des cibles ignoré.");
+            }
         }
         None => {
             println!("Démarrage de rustake");
