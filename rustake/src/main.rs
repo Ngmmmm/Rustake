@@ -1,6 +1,9 @@
 mod config;
 mod graph;
 mod cli;
+mod hash;
+mod cache;
+mod execution;
 
 use std::{fs, path::Path};
 
