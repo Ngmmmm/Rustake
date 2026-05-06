@@ -3,7 +3,7 @@ use std::fmt;
 use std::process::ExitStatus;
 
 #[derive(Debug)]
-enum ExecError {
+pub enum ExecError {
     EmptyCommand, // Erreur quand une commande est vide
     SpawnFailed(String, std::io::Error), // Erreur quand une commande ne peut pas être exécuté par status()
     ErrorExit(String, ExitStatus), // Erreur quand une commande échoue pendant son exécution
