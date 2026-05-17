@@ -69,3 +69,29 @@ fn string_to_command(command: &str) -> Command {
         c
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_run_empty_command_returns_err() {
+        let result = run("   ");
+        assert!(matches!(result, Err(ExecError::EmptyCommand)));
+    }
+
+    #[test]
+    fn test_run_all_success() {
+        let cmds = vec!["echo hello".to_string(), "echo world".to_string()];
+        assert!(run_all(&cmds).is_ok());
+    }
+
+    #[test]
+    fn test_run_all_stops_on_first_failure() {
+        #[cfg(unix)]
+        {
+            let cmds = vec!["false".to_string(), "echo ne_doit_pas_tourner".to_string()];
+            assert!(run_all(&cmds).is_err());
+        }
+    }
+}

@@ -25,7 +25,7 @@ impl Cache {
                 }
             }
         }
-        
+
         // Si aucun cache n'existe ou s'il est corrompu on renvoie un cache vide
         Cache::default()
     }
@@ -33,14 +33,14 @@ impl Cache {
     /// Sauvegarde le cache actuel sur le disque
     pub fn save(&self) -> io::Result<()> {
         let dir_path = Path::new(".rustake");
-        
+
         //On s'assure que le dossier .rustake existe
         if !dir_path.exists() {
             fs::create_dir_all(dir_path)?;
         }
 
         let cache_path = dir_path.join("cache");
-        
+
         //On sérialise notre structure en JSON
         let json_content = serde_json::to_string_pretty(self)
             .map_err(|e| io::Error::new(io::ErrorKind::Other, e.to_string()))?;
@@ -63,5 +63,31 @@ impl Cache {
             Some(cached_hash) => cached_hash != current_hash,
             None => true, // Le fichier n'est pas dans le cache donc on considère qu'il a changé
         }
+    }
+}
+
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_unknow_file_is_changed() {
+        let cache = Cache::default();
+        assert!(cache.has_changed("src/main.rs", "abc123")); // pas dans l'hashmap donc considéré comme changé
+    }
+
+    #[test]
+    fn test_has_changed_same_hash() {
+        let mut cache = Cache::default();
+        cache.update_hash("src/main.rs", "abc123".to_string());
+        assert!(!cache.has_changed("src/main.rs", "abc123"));
+    }
+
+    #[test]
+    fn test_has_changed_different_hash() {
+        let mut cache = Cache::default();
+        cache.update_hash("src/main.rs", "abc123".to_string());
+        assert!(cache.has_changed("src/main.rs", "xyz999"));
     }
 }

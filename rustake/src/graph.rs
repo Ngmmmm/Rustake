@@ -98,7 +98,7 @@ impl DepGraph {
 	    stack.push(pos);
     }
 
-    ///
+    /// Renvoie un tri topologique des noeuds d'un graphe
     pub fn topogical_sort(&self) -> Result<Vec<String>, GraphError> {
 	    if self.dfs_cycle_detection() {
 	        return Err(GraphError::HasCycleError);
@@ -127,5 +127,72 @@ impl DepGraph {
 
 	    // Renvoi le tri
 	    Ok(stack.iter().map(|&i| nodes[i].clone()).collect())
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*; // super permet d'avoir accès aux graphes et les fonctions
+    use std::collections::HashMap;
+
+    /// Construit un graphe autrement qu'avec une config (pour le test)
+    fn make_graph(edges: &[(&str, &[&str])]) -> DepGraph {
+        let mut deps: HashMap<String, Vec<String>> = HashMap::new();
+        for (node, dep) in edges {
+            deps
+                .entry(node.to_string())
+                .or_insert_with(Vec::new) // si vide, on met le vec vide
+                .extend(dep.iter().map(|s| s.to_string()));
+            for d in *dep {
+                deps.entry(d.to_string()).or_default(); // securite si les dependances existent pas comme clé
+            }
+        }
+        DepGraph { dependencies: deps }
+    }
+
+    // graphe: a -> b -> c
+    #[test]
+    fn test_no_cycle_simple() {
+        let g = make_graph(&[("a", &["b"]), ("b", &["c"]), ("c", &[])]);
+        assert!(!g.dfs_cycle_detection());
+    }
+
+    // graphe: a -> b -> a
+    #[test]
+    fn test_cycle_direct() {
+        let g = make_graph(&[("a", &["b"]), ("b", &["a"])]);
+        assert!(g.dfs_cycle_detection());
+    }
+
+    // graphe: a -> b -> c -> a
+    #[test]
+    fn test_cycle_indirect() {
+        let g = make_graph(&[("a", &["b"]), ("b", &["c"]), ("c", &["a"])]);
+        assert!(g.dfs_cycle_detection());
+    }
+
+    // graphe: vide
+    #[test]
+    fn test_empty_graph() {
+        let g = make_graph(&[]);
+        assert!(!g.dfs_cycle_detection());
+    }
+
+    // graphe: a -> b -> a
+    #[test]
+    fn test_topo_sort_returns_err_on_cycle() {
+        let g = make_graph(&[("a", &["b"]), ("b", &["a"])]);
+        assert!(matches!(g.topogical_sort(), Err(GraphError::HasCycleError)));
+    }
+
+    // graphe: b -> a
+    #[test]
+    fn test_topo_sort_order() {
+        let g = make_graph(&[("b", &["a"]), ("a", &[])]);
+        let sorted = g.topogical_sort().unwrap();
+
+        let pos_a = sorted.iter().position(|x| x == "a").unwrap();
+        let pos_b = sorted.iter().position(|x| x == "b").unwrap();
+        assert!(pos_a < pos_b, "a doit être avant b");
     }
 }
