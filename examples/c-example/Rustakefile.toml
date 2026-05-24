@@ -1,0 +1,7 @@
+[targets.program]
+depends = ["src/main.c", "src/math_utils.c", "src/string_utils.c"]
+command = "gcc -Wall -Iinclude src/main.c src/math_utils.c src/string_utils.c -o program"
+
+[targets.run]
+depends = ["program"]
+command = "./program"

@@ -1,0 +1,15 @@
+# Rustakefile.toml
+
+[targets.program]
+depends = ["src/main.rs", "src/lib.rs"]
+command = "rustc src/main.rs -o program"
+
+
+[targets.test]
+depends = ["src/lib.rs", "tests/test.rs"]
+command = "cargo test"
+
+
+[targets.run]
+depends = ["program"]
+command = "./program"

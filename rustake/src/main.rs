@@ -120,7 +120,6 @@ fn main() {
                         // Si la target n'existe pas on compile
                         let target_path = Path::new(targ);
                         if !target_path.exists() {
-                            println!("{} n'existe pas", targ);
                             besoin_recomp = true;
                         }
 
